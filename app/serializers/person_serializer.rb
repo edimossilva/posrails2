@@ -1,12 +1,12 @@
 class PersonSerializer < ActiveModel::Serializer
-    attributes :id, :nome, :sobrenome,:image_url, :nome_completo
+    attributes :id, :nome_completo, :image_url
   
     def image_url
       self.object.image_url
     end
 
     def nome_completo
-        self.object.nome = self.object.nome << self.object.sobrenome
+        "#{self.object.name}  #{self.object.last_name}"
     end
   end
   

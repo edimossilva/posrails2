@@ -2,7 +2,7 @@ class Api::V1::PeopleController < ApplicationController
     before_action :create_service, only: [:create, :index]
     def show
       person = Person.find_by_id update_person_params[:id]
-  
+        
       if person
         render_person(person, :ok)
       else
@@ -27,8 +27,8 @@ class Api::V1::PeopleController < ApplicationController
       person = Person.find_by_id update_person_params[:id]
       if person
         person.image.attach update_person_params[:image] if update_person_params[:image]
-        person.nome = update_person_params[:nome]
-        person.sobrenome = update_person_params[:sobrenome]
+        person.name = update_person_params[:name]
+        person.last_name = update_person_params[:last_name]
         if person.save
           render_person(person, :ok)
         else
@@ -43,7 +43,8 @@ class Api::V1::PeopleController < ApplicationController
         person = Person.find_by_id
         if person 
           if !person.destroy
-            render_message(:unprocessable_entity)#msg de erro caso o dado nao seja destruido
+            #render_message(:unprocessable_entity)#msg de erro caso o dado nao seja destruido
+            render_person_unprocessable_entity(person)
           end
         else
           render_person_not_found
@@ -53,11 +54,11 @@ class Api::V1::PeopleController < ApplicationController
     private
   
     def create_person_params
-      params.permit(:nome, :sobrenome,:image)
+      params.permit(:name, :last_name,:image)
     end
   
     def update_person_params
-      params.permit(:id, :nome, :sobrenome, :image)
+      params.permit(:id, :name, :last_name, :image)
     end
   
     def render_person(person, status)
@@ -65,7 +66,7 @@ class Api::V1::PeopleController < ApplicationController
     end
 
     def render_message(status)#usado caso o destroy nao seja concluido
-        render json: status: status
+        render json: { message: 'not found'}, status: :not_found
     end
   
     def render_person_not_found

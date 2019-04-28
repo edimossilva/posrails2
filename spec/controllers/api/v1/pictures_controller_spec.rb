@@ -46,7 +46,7 @@ RSpec.describe Api::V1::PicturesController, type: :controller do
   end
 
   describe '#create' do
-    let!(:name) { 'nome qualquer' }
+    let!(:name) { 'nomequalquer' }
     let!(:image_name) { 'naruto.jpeg' }
     let!(:file_path) { Rails.root.join('spec', 'support', 'assets', image_name) }
     let!(:valid_image) { fixture_file_upload(file_path, 'image/jpeg') }
