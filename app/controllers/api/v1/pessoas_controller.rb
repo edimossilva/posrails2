@@ -27,7 +27,7 @@ class Api::V1::PessoasController < ApplicationController
     pessoa = Pessoa.find_by_id update_pessoa_params[:id]
     if pessoa
       pessoa.foto.attach update_pessoa_params[:foto] if update_pessoa_params[:foto]
-      pessoa.name = update_pessoa_params[:name]
+      pessoa.nome = update_pessoa_params[:nome]
       if pessoa.save
         render_pessoa(pessoa, :ok)
       else

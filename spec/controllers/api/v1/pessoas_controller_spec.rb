@@ -1,12 +1,12 @@
 require 'rails_helper'
 
 RSpec.describe Api::V1::PessoasController, type: :controller do
+  let!(:url_da_foto) { 'josmadelmodavi.jpg' }
+  let!(:file_path) { Rails.root.join('spec', 'support', 'assets', url_da_foto) }
+  let!(:valid_image) { fixture_file_upload(file_path, 'image/jpeg') }
   describe '#create' do
     let!(:nome) { 'Josmadelmo' }
     let!(:sobrenome) { 'Davi' }
-    let!(:url_da_foto) { 'josmadelmodavi.jpg' }
-    let!(:file_path) { Rails.root.join('spec', 'support', 'assets', url_da_foto) }
-    let!(:valid_image) { fixture_file_upload(file_path, 'image/jpeg') }
     context 'Quando pessoa é criada' do
       before do
         post :create, params: { nome: nome, sobrenome: sobrenome, foto: valid_image }
@@ -70,7 +70,7 @@ RSpec.describe Api::V1::PessoasController, type: :controller do
         let!(:taken_nome) { pessoa.nome }
 
         before do
-          post :create, params: { nome: taken_nome, sobrenome: sobrenome, image: valid_image }
+          post :create, params: { nome: taken_nome, sobrenome: sobrenome, foto: valid_image }
         end
         it 'returns :unprocessable_entity' do
           expect(response).to have_http_status(:unprocessable_entity)
@@ -128,6 +128,34 @@ RSpec.describe Api::V1::PessoasController, type: :controller do
     end
   end
 
+  describe '#update' do
+  	let!(:pessoa) { create :pessoa, :with_image }
+    let!(:nome_novo) { 'Davi' }
+    let!(:sobrenome_novo) { 'Josmadelmo' }
+    context 'Quando pessoa existe' do
+      before do
+        put :update, params: { id: pessoa.id, nome: nome_novo, sobrenome: sobrenome_novo, foto: valid_image }
+      end
+      it 'responds :ok' do
+        expect(response).to have_http_status(:ok)
+      end
+      it 'nome should be different' do
+      	expect(JSON(response.body)['nome']).to_not eq(pessoa.nome)
+      end
+    end
+    context 'Quando pessoa não existe' do
+      before do
+        put :update, params: { id: -1 }
+      end
+      it 'responds :not_found' do
+        expect(response).to have_http_status(:not_found)
+      end
+      it 'contains not_found message' do
+        expect(response.body).to include("not found")
+      end
+    end
+  end
+
   describe '#destroy' do
     let!(:pessoa) { create :pessoa, :with_image }
     context 'Quando pessoa existe' do
@@ -154,3 +182,4 @@ RSpec.describe Api::V1::PessoasController, type: :controller do
     end
   end
 end
+# $ rspec -fd  spec/controllers/api/v1/pictures_controller_spec.rb
