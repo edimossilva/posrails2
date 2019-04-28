@@ -29,9 +29,13 @@ class Api::V1::PeopleController < ApplicationController
         person.image.attach update_person_params[:image] if update_person_params[:image]
         person.name = update_person_params[:name]
         person.last_name = update_person_params[:last_name]
+
         if person.save
           render_person(person, :ok)
         else
+          if !person.valid?
+            render_person_not_authorizated
+          end
           render_person_unprocessable_entity(person)
         end
       else
@@ -40,12 +44,12 @@ class Api::V1::PeopleController < ApplicationController
     end
 
     def destroy
-        person = Person.find_by_id
+        person = Person.find_by_id update_person_params[:id]
         if person 
-          if !person.destroy
+          person.destroy
             #render_message(:unprocessable_entity)#msg de erro caso o dado nao seja destruido
-            render_person_unprocessable_entity(person)
-          end
+            #render_person_unprocessable_entity(person)
+          
         else
           render_person_not_found
         end
@@ -69,6 +73,10 @@ class Api::V1::PeopleController < ApplicationController
         render json: { message: 'not found'}, status: :not_found
     end
   
+    def render_person_not_authorizated
+      render json: { message: 'not authorizated'}, status: :not_authorizated
+    end
+
     def render_person_not_found
       render json: { message: 'not found'}, status: :not_found
     end
@@ -80,5 +88,7 @@ class Api::V1::PeopleController < ApplicationController
     def create_service
       @person_service = PersonService.new
     end
+
+   
   end
   

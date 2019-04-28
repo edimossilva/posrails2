@@ -128,25 +128,93 @@ RSpec.describe Api::V1::PeopleController, type: :controller do
     end
   end
 
-    describe '#destroy' do
+    describe '#update' do
+        let!(:name) { "ney" }
+        let!(:last_name) { "soares" }
+        let!(:image_name) { 'e.jpeg' }
+        let!(:file_path) { Rails.root.join('spec', 'support', 'assets', image_name) }
+        let!(:valid_image) { fixture_file_upload(file_path, 'image/jpeg') }
+
+
         let!(:person) { create :person, :with_image }
         context 'When person exists' do
             before do
-                get :destroy, params: { id: person.id }
+                put :update, params: { id: person.id ,name: name, last_name: last_name, image: valid_image }
             end
             it 'responds :ok' do
                 #binding.pry
                 expect(response).to have_http_status(:ok)
             end
-            it 'contains the person' do
-                expected_person_json = PersonSerializer.new(person).to_json
-                expect(response.body).to eq(expected_person_json)
+        end
+
+        context 'When person does not exist' do
+            before do
+                put :update, params: { id: -1 ,name: name, last_name: last_name, image: valid_image }
+            end
+            it 'responds :not_found' do
+                expect(response).to have_http_status(:not_found)
+            end
+            it 'contains not_found message' do
+                expect(response.body).to include("not found")
+            end
+        end
+
+        context 'When person changed' do
+            before do
+                put :update, params: { id: person.id, name: name, last_name: last_name, image: valid_image }
+            end
+
+            it 'verify changed fields' do
+                new_name = JSON(response.body)['fullname']
+                expect(new_name).should_not eq(person.name+ " "+person.last_name)
+            end
+
+            it 'verify changed image' do
+                new_image = JSON(response.body)['image_url']
+                #binding.pry
+                expect(new_image).should_not eq(person.image_url)
+            end
+        end
+
+        context 'When person not changed' do
+            before do
+                put :update, params: { id: person.id , last_name: last_name, image: valid_image }
+            end
+            it 'responds :unprocessable_entity' do
+                #binding.pry
+                expect(response).to have_http_status(:unprocessable_entity)
+            end
+        end
+
+        context 'When name_person already exists' do
+            before do
+                put :update, params: { id: person.id, name: person.name, last_name: last_name, image: valid_image }
+            end
+            it 'responds :not_authorizated' do
+                #binding.pry
+                expect(response.message).to have_http_status(:not_authorizated)
+            end
+        end
+
+
+    end
+
+
+    describe '#destroy' do
+        let!(:person) { create :person, :with_image }
+        context 'When person exists' do
+            before do
+                delete :destroy, params: { id: person.id }
+            end
+            it 'responds :no_content' do
+                #binding.pry
+                expect(response).to have_http_status(:no_content)
             end
         end
 
         context 'When person does not exist' do
             before do
-                get :show, params: { id: -1 }
+                delete :destroy, params: { id: -1 }
             end
             it 'responds :not_found' do
                 expect(response).to have_http_status(:not_found)
