@@ -37,7 +37,7 @@ RSpec.describe Api::V1::PicturesController, type: :controller do
       expect(response).to have_http_status(:ok)
     end
     it 'contains all pictures' do
-      pictures = ActiveModel::SerializableResource.new(
+      pictures = ActiveModelSerializers::SerializableResource.new(
         Picture.all,
         each_serializer: PictureSerializer
       ).to_json

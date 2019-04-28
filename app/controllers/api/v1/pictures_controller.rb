@@ -1,5 +1,4 @@
 class Api::V1::PicturesController < ApplicationController
-
   before_action :create_service, only: [:create, :index]
   def show
     picture = Picture.find_by_id update_picture_params[:id]
