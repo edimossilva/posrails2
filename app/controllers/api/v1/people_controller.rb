@@ -29,7 +29,7 @@ class Api::V1::PeopleController < ApplicationController
       if person
         person.photo.attach update_person_params[:photo] if update_person_params[:photo]
         person.name = update_person_params[:name]
-        person.name = update_person_params[:surname]
+        person.surname = update_person_params[:surname]
         if person.save
           render_person(person, :ok)
         else
@@ -76,5 +76,5 @@ class Api::V1::PeopleController < ApplicationController
     def create_service
       @person_service = PersonService.new
     end
-    
+
 end

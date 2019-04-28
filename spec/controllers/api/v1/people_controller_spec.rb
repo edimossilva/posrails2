@@ -118,7 +118,6 @@ RSpec.describe Api::V1::PeopleController, type: :controller do
         end
         it 'contains name has already been taken error message' do
           body = response.body
-          binding.pry
           name_errors = JSON(body)['errors']['name']
           expect(name_errors).to include('has already been taken')
         end
@@ -127,5 +126,65 @@ RSpec.describe Api::V1::PeopleController, type: :controller do
     end
   end
 
+  describe '#destroy' do 
+    let!(:person) { create :person, :with_image }
+    context 'When person exists' do
+      before do
+        delete :destroy, params: { id: person.id }
+      end
+      it 'responds :no_content' do
+        expect(response).to have_http_status(:no_content)    
+      end
+    end
+    context 'When person does not exist' do
+      before do
+        delete :destroy, params: { id: -1 }
+      end
+
+      it 'responds :not_found' do
+        expect(response).to have_http_status(:not_found)    
+      end
+      it 'contains not_found message' do
+        expect(response.body).to include("not found")
+      end
+    end
+  end
+
+  describe '#update' do
+    let!(:name) { 'mudou' }
+    let!(:surname) { 'tudo' } 
+    let!(:image_name) { 'maxresdefault.jpg' }
+    let!(:file_path) { Rails.root.join('spec', 'support', 'assets', image_name) }
+    let!(:valid_image) { fixture_file_upload(file_path, 'image/jpeg') }
+
+    let!(:person) { create :person, :with_image }
+    context 'When person exists' do
+      before do
+        put :update, params: { id: person.id, name: name, surname: surname, photo: valid_image }
+      end
+      it 'responds :ok' do
+        expect(response).to have_http_status(:ok)    
+      end
+      it 'name has changed' do
+        body = response.body
+        binding.pry
+        expect(JSON(body)['nome_completo']).to include(person.name)
+      end
+    end
+
+    context 'When person does not exist' do
+      before do
+        delete :destroy, params: { id: -1, name: name, surname: surname, photo: valid_image }
+      end
+
+      it 'responds :not_found' do
+        expect(response).to have_http_status(:not_found)    
+      end
+      it 'contains not_found message' do
+        expect(response.body).to include("not found")
+      end
+    end
+    
+  end
 
 end
