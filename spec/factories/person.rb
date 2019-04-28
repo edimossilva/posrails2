@@ -1,7 +1,8 @@
 include ActionDispatch::TestProcess
 FactoryBot.define do
-  factory :picture do
-    name { "some name" }
+  factory :person do
+    name { "Leonardo" }
+    lastname { "Brito" }
     trait :with_image do
       after :create do |picture|
         file_path = Rails.root.join('spec', 'support', 'assets', 'naruto.jpeg')
