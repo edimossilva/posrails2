@@ -132,6 +132,9 @@ RSpec.describe Api::V1::PessoasController, type: :controller do
   	let!(:pessoa) { create :pessoa, :with_image }
     let!(:nome_novo) { 'Davi' }
     let!(:sobrenome_novo) { 'Josmadelmo' }
+    let!(:url_da_foto) { 'leonardobrito.jpg' }
+    let!(:file_path) { Rails.root.join('spec', 'support', 'assets', url_da_foto) }
+    let!(:valid_image) { fixture_file_upload(file_path, 'image/jpeg') }
     context 'Quando pessoa existe' do
       before do
         put :update, params: { id: pessoa.id, nome: nome_novo, sobrenome: sobrenome_novo, foto: valid_image }
@@ -141,6 +144,17 @@ RSpec.describe Api::V1::PessoasController, type: :controller do
       end
       it 'nome should be different' do
       	expect(JSON(response.body)['nome']).to_not eq(pessoa.nome)
+      end
+      it 'sobrenome should be different' do
+      	expect(JSON(response.body)['sobrenome']).to_not eq(pessoa.sobrenome)
+      end
+      it 'nome_completo should be different' do
+      	expect(JSON(response.body)['nome_completo']).to_not eq(pessoa.nome_completo)
+      end
+      it 'url_da_foto should be different' do
+      	url_da_foto_antiga = pessoa.url_da_foto.split('/').last
+        body_url_da_foto = JSON(response.body)['url_da_foto'].split('/').last
+        expect(body_url_da_foto).to_not eq(url_da_foto_antiga)
       end
     end
     context 'Quando pessoa não existe' do
