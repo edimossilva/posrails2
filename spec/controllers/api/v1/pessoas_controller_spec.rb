@@ -137,6 +137,20 @@ RSpec.describe Api::V1::PessoasController, type: :controller do
       it 'responds :no_content' do
         expect(response).to have_http_status(:no_content)
       end
+      it 'not contains the pessoa' do
+        expect(Pessoa.find_by_id(pessoa.id)).to be_nil
+      end
+    end
+    context 'Quando pessoa não existe' do
+      before do
+        delete :destroy, params: { id: -1 }
+      end
+      it 'responds :not_found' do
+        expect(response).to have_http_status(:not_found)
+      end
+      it 'contains not_found message' do
+        expect(response.body).to include("not found")
+      end
     end
   end
 end
