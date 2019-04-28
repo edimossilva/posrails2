@@ -33,7 +33,11 @@ class Api::V1::PeopleController < ApplicationController
         if person.save
           render_person(person, :ok)
         else
-          render_person_unprocessable_entity(person)
+          if !person.valid?
+            render json: { message: 'bad request' }, status: :bad_request
+          else
+            render_person_unprocessable_entity(person)
+          end
         end
       else
         render_person_not_found
