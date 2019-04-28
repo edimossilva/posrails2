@@ -28,6 +28,14 @@ class Api::V1::PicturesController < ApplicationController
     end
   end
 
+  def show
+    picture = Picture.find_by_id params[:id]
+    if picture
+      render_picture(picture, :ok)
+    else
+      render_picture_not_found
+    end
+  end
 
   private
 
