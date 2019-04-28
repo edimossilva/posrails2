@@ -38,6 +38,7 @@ class Api::V1::PicturesController < ApplicationController
       render_picture_not_found
     end
   end
+  
 
   private
 
