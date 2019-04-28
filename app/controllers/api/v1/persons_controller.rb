@@ -1,10 +1,11 @@
 class Api::V1::PersonsController < ApplicationController
-	 before_action :create_service, only: [:create, :index]
+
+  before_action :create_service, :find_person, only: [:create, :index, :destroy]
   def show
     person = Person.find_by_id update_person_params[:id]
 
     if person
-      render_person(person, :ok)
+     render_person(person, :ok)
     else
       render_person_not_found
     end
@@ -26,7 +27,7 @@ class Api::V1::PersonsController < ApplicationController
   def update
     person = Person.find_by_id update_person_params[:id]
     if person
-      person.image.attach update_person_params[:image] if update_person_params[:image]
+      person.photo.attach update_person_params[:photo] if update_person_params[:photo]
       person.name = update_person_params[:name]
       if person.save
         render_person(person, :ok)
@@ -38,14 +39,26 @@ class Api::V1::PersonsController < ApplicationController
     end
   end
 
+  def destroy
+        if @person.nil?
+            render json: {message: "Product not found"}, status: :not_found
+        else
+            @person.destroy
+        end
+  end 
+
   private
 
+  def find_person
+    @person = Person.find_by_id(params[:id])
+  end
+
   def create_person_params
-    params.permit(:name, :last_name, :image)
+    params.permit(:name, :lastname, :photo)
   end
 
   def update_person_params
-    params.permit(:id, :name,:last_name, :image)
+    params.permit(:id, :name, :lastname, :photo)
   end
 
   def render_person(person, status)

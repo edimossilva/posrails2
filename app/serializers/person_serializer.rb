@@ -1,7 +1,12 @@
 class PersonSerializer < ActiveModel::Serializer
-  attributes :id, :name, :last_name, :image_url
+  attributes :id, :name, :lastname, :full_name, :photo_url
 
-  def image_url
-    self.object.image_url
+   def full_name
+   	#self.object.name
+    "#{self.object.name} #{self.object.lastname}"
+  	end
+
+  def photo_url
+    self.object.photo_url
   end
 end
