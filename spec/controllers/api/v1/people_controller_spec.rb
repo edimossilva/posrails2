@@ -167,8 +167,18 @@ RSpec.describe Api::V1::PeopleController, type: :controller do
       end
       it 'name has changed' do
         body = response.body
-        binding.pry
-        expect(JSON(body)['nome_completo']).to include(person.name)
+        personUpdated = Person.find_by_id JSON(body)['id']  
+        expect(personUpdated.name).to eq(name)
+      end
+      it 'surname has changed' do
+        body = response.body
+        personUpdated = Person.find_by_id JSON(body)['id']  
+        expect(personUpdated.surname).to eq(surname)
+      end
+      it 'photo has changed' do
+        body = response.body
+        personUpdated = Person.find_by_id JSON(body)['id']  
+        expect(personUpdated.photo_url).should_not eq(person.photo_url)
       end
     end
 
@@ -185,6 +195,8 @@ RSpec.describe Api::V1::PeopleController, type: :controller do
       end
     end
     
+    
   end
+  
 
 end
