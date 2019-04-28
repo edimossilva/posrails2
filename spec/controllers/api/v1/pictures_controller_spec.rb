@@ -50,6 +50,7 @@ RSpec.describe Api::V1::PicturesController, type: :controller do
     let!(:image_name) { 'naruto.jpeg' }
     let!(:file_path) { Rails.root.join('spec', 'support', 'assets', image_name) }
     let!(:valid_image) { fixture_file_upload(file_path, 'image/jpeg') }
+
     context 'When image is created' do
       before do
         post :create, params: { name: name, image: valid_image }
@@ -71,7 +72,9 @@ RSpec.describe Api::V1::PicturesController, type: :controller do
         expect(body_image_name).to eq(image_name)
       end
     end
+
     context 'When image is not create' do
+
       context 'When name is empty' do
         let!(:empty_name) { '' }
         before do
@@ -86,6 +89,7 @@ RSpec.describe Api::V1::PicturesController, type: :controller do
           expect(name_errors).to include("can't be blank")
         end
       end
+
       context 'When name has been taken' do
         let!(:picture) { create :picture, :with_image }
         let!(:taken_name) { picture.name }
@@ -102,6 +106,7 @@ RSpec.describe Api::V1::PicturesController, type: :controller do
           expect(name_errors).to include('has already been taken')
         end
       end
+      
     end
   end
 end
