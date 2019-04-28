@@ -113,19 +113,74 @@ RSpec.describe Api::V1::PessoasController, type: :controller do
 
 	describe '#destroy' do
 	    let!(:pessoa) { create :pessoa, :with_image }
-	    before do
-			delete :destroy, params: { id: pessoa.id }
+
+	    context 'When delete the people' do
+		    before do
+				delete :destroy, params: { id: pessoa.id }
+		    end
+		    it 'responds :no_content' do
+		      	expect(response).to have_http_status(:no_content)
+		    end
+		end
+	    context 'When people does not exist' do
+			before do
+				delete :destroy, params: { id: -1 }
+		    end
+			it 'responds :not_found' do
+				expect(response).to have_http_status(:not_found)
+			end
+			it 'contains not_found message' do
+				message = JSON(response.body)['message']
+				expect(message).to eq("not found")
+			end
 	    end
-	    it 'responds :no_content' do
-	    	binding.pry
-	      	expect(response).to have_http_status(:no_content)
-	    end
-	    it 'contains all peoples' do
-	      	peoples = ActiveModel::SerializableResource.new(
-	        	Pessoa.all,
-	        		each_serializer: PessoaSerializer
-	      		).to_json
-	      	expect(response.body).to eq(peoples)
+	end
+
+	describe '#update' do
+	    let!(:pessoa) { create :pessoa, :with_image }
+ 		let!(:update_name) { 'nome qualquer' }
+	    let!(:update_sobrenome) { 'sobrenome qualquer' }
+	    let!(:image_name) { 'naruto.jpeg' }
+	    let!(:file_path) { Rails.root.join('spec', 'support', 'assets', image_name) }
+	    let!(:update_image) { fixture_file_upload(file_path, 'image/jpeg') }
+
+	    context 'When update the people' do
+		    before do
+				put :update, params: { id: pessoa.id, nome: update_name, sobrenome: update_sobrenome, image: update_image }
+		    end
+		    it 'responds :ok' do
+		      	expect(response).to have_http_status(:ok)
+		    end
+		    it 'verify if change the full_name' do
+		    	new_name = JSON(response.body)['full_name']
+				expect(new_name).should_not eq(pessoa.nome + " " + pessoa.sobrenome)
+		    end
+		    it 'verify if change the field photo_url' do
+		    	new_photo = JSON(response.body)['photo_url']
+				expect(new_photo).should_not eq(pessoa.image_url)
+		    end
+		end
+
+		context 'When the people new name exist' do
+		    before do
+				put :update, params: { id: pessoa.id, nome: update_name, sobrenome: update_sobrenome, image: update_image }
+		    end
+		    it 'responds :ok' do
+		      	expect(response).to have_http_status(:ok)
+		    end
+		end
+
+	    context 'When people does not exist' do
+			before do
+				put :update, params: { id: -1 }
+		    end
+			it 'responds :not_found' do
+				expect(response).to have_http_status(:not_found)
+			end
+			it 'contains not_found message' do
+				message = JSON(response.body)['message']
+				expect(message).to eq("not found")
+			end
 	    end
 	end
 

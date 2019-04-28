@@ -26,10 +26,10 @@ class Api::V1::PessoasController < ApplicationController
 	end
 
 	def update
-    	pessoa = Pessoa.find_by_id update_pessoa_params[:id]
+    	pessoa = Pessoa.find_by_id update_people_params[:id]
 	    if pessoa
 			if pessoa.update update_people_params
-				render_people(picture, :ok)
+				render_people(pessoa, :ok)
 			else
 				render_people_unprocessable_entity(pessoa)
 			end
