@@ -1,7 +1,7 @@
 include Rails.application.routes.url_helpers
 class Person < ApplicationRecord
-    validates :nome, presence: true, uniqueness: true
-    validates :sobrenome, presence: true
+    validates :name, presence: true, uniqueness: true
+    validates :last_name, presence: true
     has_one_attached :image
   
     def image_url

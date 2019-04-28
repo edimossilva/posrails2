@@ -1,9 +1,9 @@
-class PessoaService
-  def create(create_pessoa_params)
-    Pessoa.create create_pessoa_params
+class PictureService
+  def create(create_picture_params)
+    Picture.create create_picture_params
   end
 
   def all
-    Pessoa.all
+    Picture.all
   end
 end

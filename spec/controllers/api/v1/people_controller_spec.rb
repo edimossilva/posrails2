@@ -64,13 +64,15 @@ RSpec.describe Api::V1::PeopleController, type: :controller do
                 body = response.body
                 expect(JSON(body)['id']).to_not be_nil
             end
+
             it 'contains field name' do
                 body = response.body
-                expect(JSON(body)['name']).to eq(name)
+                #binding.pry
+                expect(JSON(body)['nome_completo']).to include(name)
             end
             it 'contains field last_name' do
                 body = response.body
-                expect(JSON(body)['last_name']).to eq(last_name)
+                expect(JSON(body)['nome_completo']).to include(last_name)
             end
             it 'contains field image_url' do
                 body = response.body
@@ -91,7 +93,7 @@ RSpec.describe Api::V1::PeopleController, type: :controller do
                 let!(:last_name) { 'soares' }
 
                 before do
-                post :create, params: { name: empty_name, last_name: last_name, image: valid_image }
+                    post :create, params: { name: empty_name, last_name: last_name, image: valid_image }
                 end
                 it 'returns :unprocessable_entity' do
                 expect(response).to have_http_status(:unprocessable_entity)
@@ -106,10 +108,12 @@ RSpec.describe Api::V1::PeopleController, type: :controller do
         context 'When name has been taken' do
             let!(:person) { create :person, :with_image }
             let!(:taken_name) { person.name }
+            let!(:last_name) { person.last_name }
+
             #nao sei se coloca o last_name tambem
 
             before do
-            post :create, params: { name: taken_name, image: valid_image }
+                post :create, params: { name: taken_name, last_name: last_name,image: valid_image }
             end
             it 'returns :unprocessable_entity' do
                 expect(response).to have_http_status(:unprocessable_entity)
@@ -120,45 +124,37 @@ RSpec.describe Api::V1::PeopleController, type: :controller do
                 expect(name_errors).to include('has already been taken')
             end
         end
-
-
-        #last_name
-        context 'When last_name is empty' do
-            let!(:name) { 'neylanio' }
-            let!(:empty_last_name) { '' }
-
-            before do
-                post :create, params: { name: name, last_name: empty_last_name, image: valid_image }
-            end
-            it 'returns :unprocessable_entity' do
-                expect(response).to have_http_status(:unprocessable_entity)
-            end
-            it 'contains name cant be blank error message' do
-                body = response.body
-                name_errors = JSON(body)['errors']['name']#nao sei se e name mesmo ou last_name
-                expect(name_errors).to include("can't be blank")
-            end
-        end
-
-        context 'When last_name has been taken' do
-            let!(:person) { create :person, :with_image }
-            let!(:taken_last_name) { person.last_name }
-            #nao sei se coloca o name tambem
-
-            before do
-                post :create, params: { last_name: taken_last_name, image: valid_image }
-            end
-            it 'returns :unprocessable_entity' do
-                expect(response).to have_http_status(:unprocessable_entity)
-            end
-            it 'contains last_name has already been taken error message' do
-                body = response.body
-                name_errors = JSON(body)['errors']['name']#nao sei se e name mesmo ou last_name
-                expect(name_errors).to include('has already been taken')
-            end
-        end
-
       
     end
   end
+
+    describe '#destroy' do
+        let!(:person) { create :person, :with_image }
+        context 'When person exists' do
+            before do
+                get :destroy, params: { id: person.id }
+            end
+            it 'responds :ok' do
+                #binding.pry
+                expect(response).to have_http_status(:ok)
+            end
+            it 'contains the person' do
+                expected_person_json = PersonSerializer.new(person).to_json
+                expect(response.body).to eq(expected_person_json)
+            end
+        end
+
+        context 'When person does not exist' do
+            before do
+                get :show, params: { id: -1 }
+            end
+            it 'responds :not_found' do
+                expect(response).to have_http_status(:not_found)
+            end
+            it 'contains not_found message' do
+                expect(response.body).to include("not found")
+            end
+        end
+    end
+
 end
